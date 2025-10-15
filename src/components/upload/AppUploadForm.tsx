@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '../../context/AuthContext';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { useBackblaze } from '../../hooks/useBackblaze';
+import { useBackblaze } from '../../hooks/useSupabaseStorage';
 import { AppData } from '../../types/app';
 
 interface AppFormData {
@@ -16,7 +16,7 @@ interface AppFormData {
 
 const AppUploadForm: React.FC = () => {
   const { currentUser } = useAuth();
-  const { isUploading, uploadProgress, uploadFiles } = useBackblaze();
+  const { isUploading, uploadProgress, uploadFiles } = useSupabaseStorage();
   
   const { register, handleSubmit, formState: { errors } } = useForm<AppFormData>();
   
