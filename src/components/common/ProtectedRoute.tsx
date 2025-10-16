@@ -24,7 +24,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (allowedRoles.length > 0 && (!userRole || !allowedRoles.includes(userRole))) {
-    return fallback;
+    return <>{fallback}</>;
   }
 
   return <>{children}</>;
