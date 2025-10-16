@@ -8,26 +8,30 @@ export default function Header() {
 
   const handleSignIn = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      // You can add a user-facing error message here
+    }
   };
 
   return (
-    <header className="bg-gray-800 text-white shadow-md">
+    <header className="bg-dark-800 text-white shadow-md sticky top-0 z-50">
       <nav className="container mx-auto flex justify-between items-center p-4">
-        {/* CORRECTED: Modern Next.js Link component usage */}
-        <Link href="/" className="text-xl font-bold hover:text-cyan-400 transition-colors">
+        <Link href="/" className="text-xl font-bold hover:text-brand-light transition-colors">
           MMN Store
         </Link>
         <div>
           {user ? (
             <div className="flex items-center space-x-4">
-              <span className="text-sm">Welcome, {user.name.split(' ')[0]}</span>
-              <button onClick={() => signOut(auth)} className="bg-red-600 px-4 py-2 text-sm font-semibold rounded-md hover:bg-red-700 transition-colors">
+              <span className="text-sm hidden sm:block">Welcome, {user.name.split(' ')[0]}</span>
+              <button onClick={() => signOut(auth)} className="bg-red-600 px-3 py-1.5 text-sm font-semibold rounded-md hover:bg-red-700 transition-colors">
                 Logout
               </button>
             </div>
           ) : (
-            <button onClick={handleSignIn} className="bg-blue-600 px-4 py-2 text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors">
+            <button onClick={handleSignIn} className="bg-blue-600 px-3 py-1.5 text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors">
               Login with Google
             </button>
           )}
