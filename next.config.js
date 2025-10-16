@@ -3,7 +3,6 @@ const nextConfig = {
   reactStrictMode: false,
   images: {
     domains: ['api.backblazeb2.com', 'f002.backblazeb2.com', 'your-project-ref.supabase.co'],
-    unoptimized: true, // Static export के लिए जरूरी
   },
   env: {
     BACKBLAZE_BUCKET_URL: process.env.BACKBLAZE_BUCKET_URL,
@@ -14,12 +13,8 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Static export के लिए यह line add करें
-  output: 'export',
-  // Trailing slash को handle करने के लिए
-  trailingSlash: true,
-  // Base path के लिए (अगर आप subdirectory में deploy कर रहे हैं)
-  // basePath: '/your-repo-name',
+  // Static export हटा दें
+  // output: 'export', // इस line को comment करें या delete करें
 };
 
 module.exports = nextConfig;
