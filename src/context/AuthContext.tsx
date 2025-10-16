@@ -1,101 +1,59 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from '../config/firebase';
-import { 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  signOut, 
-  onAuthStateChanged,
-  User 
-} from 'firebase/auth';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../config/firebase';
-import { UserRole } from '../types/auth';
+import { auth, firestore } from '../config/firebase';
+import { UserProfile } from '../types/auth';
 
 interface AuthContextType {
-  currentUser: User | null;
-  userRole: UserRole | null;
+  user: UserProfile | null;
+  firebaseUser: FirebaseUser | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
-  logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  firebaseUser: null,
+  loading: true,
+});
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      
-      if (user) {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-          if (userDoc.exists()) {
-            setUserRole(userDoc.data().role as UserRole);
-          } else {
-            // Create a new user document with default role
-            await setDoc(doc(db, 'users', user.uid), {
-              name: user.displayName,
-              email: user.email,
-              photoURL: user.photoURL,
-              role: 'user',
-              joinedAt: serverTimestamp(),
-            });
-            setUserRole('user');
-          }
-        } catch (error) {
-          console.error('Error fetching user role:', error);
-          setUserRole('user');
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      setFirebaseUser(fbUser);
+      if (fbUser) {
+        const userRef = doc(firestore, 'users', fbUser.uid);
+        const docSnap = await getDoc(userRef);
+        if (docSnap.exists()) {
+          setUser({ uid: fbUser.uid, ...docSnap.data() } as UserProfile);
+        } else {
+          const newUser: Omit<UserProfile, 'uid' | 'joinedAt'> = {
+            name: fbUser.displayName || 'Anonymous User',
+            email: fbUser.email!,
+            avatarUrl: fbUser.photoURL,
+            role: 'user',
+          };
+          await setDoc(userRef, { ...newUser, joinedAt: serverTimestamp() });
+          setUser({ uid: fbUser.uid, ...newUser, joinedAt: new Date() } as UserProfile);
         }
       } else {
-        setUserRole(null);
+        setUser(null);
       }
-      
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-    }
-  };
+  const value = { user, firebaseUser, loading };
 
-  const logout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
+  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+};
 
-  const value = {
-    currentUser,
-    userRole,
-    loading,
-    signInWithGoogle,
-    logout,
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+// Custom hook for easy access
+export const useAuth = () => {
+  return useContext(AuthContext);
 };
