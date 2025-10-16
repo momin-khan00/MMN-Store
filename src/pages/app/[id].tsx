@@ -41,28 +41,28 @@ const AppDetailPage: React.FC = () => {
   }, [id, router]);
 
   const handleDownload = async () => {
-    if (!app || isDownloading) return;
+  if (!app || isDownloading) return;
+  
+  setIsDownloading(true);
+  
+  try {
+    // Increment download count in Firestore
+    await updateDoc(doc(db, 'apps', app.id), {
+      downloadCount: app.downloadCount + 1
+    });
     
-    setIsDownloading(true);
+    // Update local state
+    setApp(prev => prev ? { ...prev, downloadCount: prev.downloadCount + 1 } : null);
     
-    try {
-      // Increment download count
-      await updateDoc(doc(db, 'apps', app.id), {
-        downloadCount: app.downloadCount + 1
-      });
-      
-      // Update local state
-      setApp(prev => prev ? { ...prev, downloadCount: prev.downloadCount + 1 } : null);
-      
-      // Start download
-      window.open(app.apkUrl, '_blank');
-    } catch (error) {
-      console.error('Error downloading app:', error);
-      alert('Failed to download app. Please try again.');
-    } finally {
-      setIsDownloading(false);
-    }
-  };
+    // Start download from Supabase
+    window.open(app.apkUrl, '_blank');
+  } catch (error) {
+    console.error('Error downloading app:', error);
+    alert('Failed to download app. Please try again.');
+  } finally {
+    setIsDownloading(false);
+  }
+};
 
   const formatSize = (bytes: number): string => {
     if (bytes < 1024 * 1024) {
