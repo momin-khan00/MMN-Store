@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { auth, firestore } from '@/config/firebase';
 import { UserProfile } from '@/types/auth';
 
@@ -21,17 +21,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userRef = doc(firestore, 'users', fbUser.uid);
         const docSnap = await getDoc(userRef);
         if (docSnap.exists()) {
-          setUser({ uid: fbUser.uid, ...docSnap.data() } as UserProfile);
+          setUser(docSnap.data() as UserProfile);
         } else {
-          const newUser: Omit<UserProfile, 'uid' | 'joinedAt'> = {
+          // CORRECTED PART: Create a complete user profile object for the client
+          const newUserProfile: UserProfile = {
+            uid: fbUser.uid,
             name: fbUser.displayName || 'New User',
             email: fbUser.email!,
             avatarUrl: fbUser.photoURL || undefined,
             role: 'user',
+            joinedAt: Timestamp.now(), // Use a client-side timestamp as a placeholder
           };
-          await setDoc(userRef, { ...newUser, joinedAt: serverTimestamp() });
-          // Note: Firestore timestamp will be null until server roundtrip
-          setUser({ uid: fbUser.uid, ...newUser } as UserProfile);
+          // Send to Firebase with a server timestamp
+          await setDoc(userRef, {
+            ...newUserProfile,
+            joinedAt: serverTimestamp(),
+          });
+          setUser(newUserProfile);
         }
       } else {
         setUser(null);
