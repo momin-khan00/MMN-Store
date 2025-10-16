@@ -1,20 +1,11 @@
 import Head from 'next/head';
 import AppCard from '@/components/app/AppCard';
-import type { App } from '@/types/app';
-
-// DUMMY DATA for designing the UI. We will replace this with Firestore data later.
-const mockApps: App[] = [
-  { id: '1', name: 'Photo Editor Pro', developerName: 'Pixel Perfect Inc.', category: 'Photography', iconUrl: '/icons/default-app-icon.png', rating: 4.5 },
-  { id: '2', name: 'Task Manager Deluxe', developerName: 'Productivity Hub', category: 'Productivity', iconUrl: '/icons/default-app-icon.png', rating: 4.8 },
-  { id: '3', name: 'Galaxy Warriors', developerName: 'Galaxy Games', category: 'Games', iconUrl: '/icons/default-app-icon.png', rating: 4.2 },
-  { id: '4', name: 'Finance Tracker', developerName: 'MoneyWise', category: 'Finance', iconUrl: '/icons/default-app-icon.png', rating: 4.9 },
-  { id: '5', name: 'Music Stream+', developerName: 'SoundWave', category: 'Music', iconUrl: '/icons/default-app-icon.png', rating: 4.6 },
-  { id: '6', name: 'Super VPN', developerName: 'SecureNet', category: 'Tools', iconUrl: '/icons/default-app-icon.png', rating: 4.7 },
-  { id: '7', name: 'Weather Now', developerName: 'Forecast Co.', category: 'Weather', iconUrl: '/icons/default-app-icon.png', rating: 4.4 },
-  { id: '8', name: 'Recipe Finder', developerName: 'Kitchen Helper', category: 'Food', iconUrl: '/icons/default-app-icon.png', rating: 4.3 },
-];
+import { useApprovedApps } from '@/hooks/useFirestore';
+import Loading from '@/components/common/Loading';
 
 export default function Home() {
+  const { apps, loading, error } = useApprovedApps();
+
   return (
     <>
       <Head>
@@ -32,11 +23,23 @@ export default function Home() {
         {/* App Grid Section */}
         <section>
           <h2 className="text-3xl font-extrabold text-white mb-4">Discover Apps</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {mockApps.map(app => (
-              <AppCard key={app.id} app={app} />
-            ))}
-          </div>
+          {loading && <Loading />}
+          {error && <p className="text-red-500">Error loading apps. Please try again later.</p>}
+          {!loading && !error && (
+            <>
+              {apps.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {apps.map(app => (
+                    <AppCard key={app.id} app={app} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-10 bg-dark-800 rounded-2xl">
+                  <p className="text-gray-400">No apps found. Check back later!</p>
+                </div>
+              )}
+            </>
+          )}
         </section>
       </div>
     </>
