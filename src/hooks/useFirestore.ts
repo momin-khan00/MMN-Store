@@ -10,6 +10,7 @@ export function useApprovedApps() {
 
   useEffect(() => {
     const fetchApps = async () => {
+      setLoading(true);
       try {
         const appsRef = collection(firestore, 'apps');
         const q = query(
