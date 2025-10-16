@@ -19,7 +19,7 @@
 # All other routes को index.html पर redirect करें
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/index.tsx"
   status = 200
 
 # Headers for security
