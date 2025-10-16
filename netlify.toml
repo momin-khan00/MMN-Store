@@ -4,28 +4,3 @@
 
 [build.environment]
   NODE_VERSION = "16"
-
-# Next.js के लिए proper redirects
-[[redirects]]
-  from = "/_next/static/*"
-  to = "/_next/static/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
-# All other routes को index.html पर redirect करें
-[[redirects]]
-  from = "/*"
-  to = "/index.tsx"
-  status = 200
-
-# Headers for security
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
