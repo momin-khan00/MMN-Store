@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, getDocs, DocumentData } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { AppData } from '../../types/app';
 import AppCard from './AppCard';
@@ -64,7 +64,12 @@ const AppList: React.FC<AppListProps> = ({
         const appsData: AppData[] = [];
         
         querySnapshot.forEach((doc) => {
-          appsData.push({ id: doc.id, ...doc.data() } as AppData);
+          // Fix: Properly type cast the document data
+          const data = doc.data() as DocumentData;
+          appsData.push({ 
+            id: doc.id, 
+            ...data 
+          } as AppData);
         });
         
         setApps(appsData);
