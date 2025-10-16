@@ -18,28 +18,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
+        // User is logged in, check Firestore
         const userRef = doc(firestore, 'users', fbUser.uid);
         const docSnap = await getDoc(userRef);
+        
         if (docSnap.exists()) {
+          // User document already exists, just set the state
           setUser(docSnap.data() as UserProfile);
         } else {
-          // CORRECTED PART: Create a complete user profile object for the client
-          const newUserProfile: UserProfile = {
+          // New user, create the document in Firestore
+          const newUserProfile: Omit<UserProfile, 'joinedAt'> = {
             uid: fbUser.uid,
             name: fbUser.displayName || 'New User',
             email: fbUser.email!,
             avatarUrl: fbUser.photoURL || undefined,
-            role: 'user',
-            joinedAt: Timestamp.now(), // Use a client-side timestamp as a placeholder
+            role: 'user', // Default role
           };
-          // Send to Firebase with a server timestamp
-          await setDoc(userRef, {
-            ...newUserProfile,
-            joinedAt: serverTimestamp(),
-          });
-          setUser(newUserProfile);
+          
+          try {
+            await setDoc(userRef, {
+              ...newUserProfile,
+              joinedAt: serverTimestamp(), // Let server set the timestamp
+            });
+            // Set user state with a client-side placeholder for the date
+            setUser({ ...newUserProfile, joinedAt: new Timestamp(Date.now() / 1000, 0) });
+          } catch (error) {
+            console.error("Error creating user document:", error);
+          }
         }
       } else {
+        // User is logged out
         setUser(null);
       }
       setLoading(false);
