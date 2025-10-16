@@ -1,8 +1,10 @@
+// src/pages/index.tsx
 import React from 'react';
 import Head from 'next/head';
 import { useAuth } from '../context/AuthContext';
-import AppList from '../components/app/AppList';
 import FeaturedCarousel from '../components/app/FeaturedCarousel';
+import AppList from '../components/app/AppList';
+import CategoryGrid from '../components/app/CategoryGrid';
 import AdBanner from '../components/common/AdBanner';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
@@ -11,7 +13,7 @@ const HomePage: React.FC = () => {
   const { userRole } = useAuth();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       <Head>
         <title>MMN Store - Modern Multi-Role App Store</title>
         <meta name="description" content="Discover and download amazing apps" />
@@ -20,93 +22,101 @@ const HomePage: React.FC = () => {
 
       <Header />
 
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className="pb-8">
         {/* Hero Section */}
-        <section className="mb-12 text-center">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            Welcome to MMN Store
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Discover, download, and share amazing apps. Join our community of developers and users.
-          </p>
-          
-          {userRole === 'developer' && (
-            <div className="mt-6">
-              <a 
-                href="/upload" 
-                className="inline-block bg-blue-600 text-white font-medium py-2 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              >
-                Upload Your App
-              </a>
+        <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold mb-4">
+                Welcome to MMN Store
+              </h1>
+              <p className="text-xl max-w-2xl mx-auto mb-8">
+                Discover, download, and share amazing apps. Join our community of developers and users.
+              </p>
+              
+              {userRole === 'developer' && (
+                <div>
+                  <a 
+                    href="/upload" 
+                    className="inline-block bg-white text-blue-600 font-medium py-3 px-6 rounded-full hover:bg-gray-100 transition-colors"
+                  >
+                    Upload Your App
+                  </a>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </section>
 
+        {/* Search Bar for Mobile */}
+        <div className="md:hidden px-4 py-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search apps and games"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
         {/* Featured Apps Carousel */}
-        <section className="mb-12">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Featured Apps</h2>
-            <a href="/apps?featured=true" className="text-blue-600 hover:underline">
-              View All
+            <a href="/apps?featured=true" className="text-blue-600 hover:text-blue-800 font-medium">
+              See all
             </a>
           </div>
           <FeaturedCarousel />
         </section>
 
         {/* Ad Banner */}
-        <div className="my-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <AdBanner type="banner" />
         </div>
 
+        {/* Categories */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">Categories</h2>
+            <a href="/categories" className="text-blue-600 hover:text-blue-800 font-medium">
+              See all
+            </a>
+          </div>
+          <CategoryGrid />
+        </section>
+
         {/* Trending Apps */}
-        <section className="mb-12">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Trending Apps</h2>
-            <a href="/apps?trending=true" className="text-blue-600 hover:underline">
-              View All
+            <a href="/apps?trending=true" className="text-blue-600 hover:text-blue-800 font-medium">
+              See all
             </a>
           </div>
           <AppList trending={true} limit={8} />
         </section>
 
-        {/* Categories */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Browse by Category</h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {['Games', 'Productivity', 'Social', 'Entertainment', 'Education'].map((category) => (
-              <a 
-                key={category}
-                href={`/apps?category=${category.toLowerCase()}`}
-                className="bg-white p-4 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow"
-              >
-                <div className="text-2xl mb-2">
-                  {category === 'Games' && '🎮'}
-                  {category === 'Productivity' && '💼'}
-                  {category === 'Social' && '👥'}
-                  {category === 'Entertainment' && '🎬'}
-                  {category === 'Education' && '📚'}
-                </div>
-                <h3 className="font-medium text-gray-800">{category}</h3>
-              </a>
-            ))}
-          </div>
-        </section>
-
-        {/* Recent Apps */}
-        <section className="mb-12">
+        {/* Recommended for You */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Recently Added</h2>
-            <a href="/apps" className="text-blue-600 hover:underline">
-              View All
+            <h2 className="text-2xl font-bold text-gray-800">Recommended for You</h2>
+            <a href="/apps?recommended=true" className="text-blue-600 hover:text-blue-800 font-medium">
+              See all
             </a>
           </div>
           <AppList limit={8} />
         </section>
 
         {/* Ad Banner */}
-        <div className="my-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <AdBanner type="native" />
-        </div>
+        </section>
       </main>
 
       <Footer />
