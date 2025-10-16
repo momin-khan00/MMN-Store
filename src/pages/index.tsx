@@ -1,8 +1,16 @@
+import { useAuth } from "@/context/AuthContext";
+
 export default function Home() {
+  const { user } = useAuth();
+
   return (
-    <div>
-      <h1>Deploy Successful!</h1>
-      <p>My MMN Store is live.</p>
-    </div>
+    <main className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold">Welcome to the MMN Store</h1>
+      {user ? (
+        <p>You are logged in as {user.name}.</p>
+      ) : (
+        <p>Please log in to continue.</p>
+      )}
+    </main>
   );
 }
