@@ -1,6 +1,12 @@
-[build]
-  command = "npm run build"
-  publish = ".next"
+# File: netlify.toml
 
-[build.environment]
-  NODE_VERSION = "16"
+# Build settings for Netlify
+[build]
+  command = "next build"      # The command to build your site
+  publish = ".next"         # The directory to publish (Next.js default)
+
+# Netlify plugins can be added here if needed.
+# This Essential Next.js plugin is often added automatically by Netlify,
+# but it's good practice to specify it for build optimizations.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
