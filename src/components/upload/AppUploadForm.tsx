@@ -42,10 +42,12 @@ export default function AppUploadForm() {
       
       setStatusMessage("Uploading APK file...");
       const apkPath = `apks/${user.uid}/${timestamp}-${files.apk.name}`;
+      // THE FIX: Calling uploadFile with exactly 2 arguments.
       const apkUrl = await uploadFile(files.apk, apkPath);
 
       setStatusMessage("Uploading App Icon...");
       const iconPath = `icons/${user.uid}/${timestamp}-${files.icon.name}`;
+      // THE FIX: Calling uploadFile with exactly 2 arguments.
       const iconUrl = await uploadFile(files.icon, iconPath);
 
       if (!apkUrl || !iconUrl) {
@@ -53,7 +55,6 @@ export default function AppUploadForm() {
       }
 
       setStatusMessage("Saving app details to database...");
-      // THE FIX: The data object now perfectly matches the App type
       await addDoc(collection(firestore, 'apps'), {
         name: formState.name,
         description: formState.description,
@@ -87,7 +88,8 @@ export default function AppUploadForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
+      {/* Form Fields... (No changes here) */}
+       <div>
         <label className="block mb-2 font-semibold">App Name</label>
         <input type="text" name="name" onChange={handleInputChange} required className={inputStyle} />
       </div>
