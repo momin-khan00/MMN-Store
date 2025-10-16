@@ -13,8 +13,8 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Static export हटा दें
-  // output: 'export', // इस line को comment करें या delete करें
+  // Static export नहीं करें
+  // output: 'export', // इस line को remove करें या comment करें
 };
 
 module.exports = nextConfig;
