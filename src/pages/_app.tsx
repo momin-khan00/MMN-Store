@@ -6,8 +6,12 @@ import Header from '@/components/common/Header'
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <AuthProvider>
-      <Header />
-      <Component {...pageProps} />
+      <div className="bg-gray-900 text-gray-100 min-h-screen">
+        <Header />
+        <main>
+          <Component {...pageProps} />
+        </main>
+      </div>
     </AuthProvider>
   )
 }
