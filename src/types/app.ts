@@ -1,21 +1,21 @@
-export interface AppData {
+import { Timestamp } from 'firebase/firestore';
+
+export type AppStatus = "pending" | "approved" | "rejected";
+
+export interface App {
   id: string;
   name: string;
   description: string;
   category: string;
   version: string;
-  apkUrl: string;
-  iconUrl: string;
-  screenshots: string[];
+  apkUrl: string;       // Supabase Storage URL
+  iconUrl: string;      // Supabase Storage URL
+  screenshots: string[]; // Array of Supabase Storage URLs
   developerId: string;
-  developerName: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: AppStatus;
   downloadCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-  size: number;
-  permissions: string[];
-  rating: number;
-  reviewsCount: number;
-  featured?: boolean;
+  createdAt: Timestamp | Date;
+  // Optional fields
+  rating?: number;
+  reviewCount?: number;
 }
