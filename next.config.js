@@ -1,18 +1,16 @@
+// File: next.config.js
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false,
+  reactStrictMode: true, // Recommended for helping find potential problems
   images: {
-    domains: ['api.backblazeb2.com', 'f002.backblazeb2.com', 'https://vioqetdvaoxzrqcuuclu.supabase.co'],
+    // Whitelist domains for next/image optimization.
+    // This is crucial for loading your Supabase Storage images.
+    domains: [
+      'lh3.googleusercontent.com', // For Google user profile pictures
+      'https://vioqetdvaoxzrqcuuclu.supabase.co' // **REPLACE THIS** with your Supabase project ref
+    ],
   },
-  env: {
-    BACKBLAZE_BUCKET_URL: process.env.BACKBLAZE_BUCKET_URL,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig
