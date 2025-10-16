@@ -12,18 +12,22 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-gray-800 text-white p-4">
-      <nav className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="text-xl font-bold">
+    <header className="bg-gray-800 text-white shadow-md">
+      <nav className="container mx-auto flex justify-between items-center p-4">
+        {/* CORRECTED: Modern Next.js Link component usage */}
+        <Link href="/" className="text-xl font-bold hover:text-cyan-400 transition-colors">
           MMN Store
         </Link>
         <div>
           {user ? (
-            <button onClick={() => signOut(auth)} className="bg-red-600 px-4 py-2 rounded">
-              Logout
-            </button>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm">Welcome, {user.name.split(' ')[0]}</span>
+              <button onClick={() => signOut(auth)} className="bg-red-600 px-4 py-2 text-sm font-semibold rounded-md hover:bg-red-700 transition-colors">
+                Logout
+              </button>
+            </div>
           ) : (
-            <button onClick={handleSignIn} className="bg-blue-600 px-4 py-2 rounded">
+            <button onClick={handleSignIn} className="bg-blue-600 px-4 py-2 text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors">
               Login with Google
             </button>
           )}
