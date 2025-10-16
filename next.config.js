@@ -8,7 +8,7 @@ const nextConfig = {
     // This is crucial for loading your Supabase Storage images.
     domains: [
       'lh3.googleusercontent.com', // For Google user profile pictures
-      'https://vioqetdvaoxzrqcuuclu.supabase.co' // **REPLACE THIS** with your Supabase project ref
+      'vioqetdvaoxzrqcuuclu.supabase.co' // **REPLACE THIS** with your Supabase project ref
     ],
   },
 }
