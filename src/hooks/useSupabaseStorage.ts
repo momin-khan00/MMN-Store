@@ -1,38 +1,31 @@
 import { useState } from 'react';
 import { supabase } from '@/config/supabase';
 
+/**
+ * Custom hook to handle file uploads to a specific Supabase bucket.
+ */
 export function useSupabaseStorage() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * Uploads a file to a specified path within a bucket.
-   * @param file The file to upload.
-   * @param bucket The name of the storage bucket (e.g., 'apps').
-   * @param path The full path for the file within the bucket (e.g., 'apks/user123/app.apk').
-   * @returns The public URL of the uploaded file, or null on failure.
+   * Uploads a file to a predefined 'apps' bucket.
+   * @param file The file object to upload.
+   * @param path The full path including folders and filename for the object in the bucket.
+   * @returns The public URL of the uploaded file, or null if an error occurred.
    */
-  const uploadFile = async (file: File, bucket: string, path: string): Promise<string | null> => {
+  const uploadFile = async (file: File, path: string): Promise<string | null> => {
     setIsUploading(true);
     setError(null);
-
     try {
-      // Upload the file
+      // THE FIX: The function correctly takes 2 arguments and uses the 'apps' bucket.
       const { data, error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(path, file, { upsert: false }); // upsert: false prevents overwriting
+        .from('apps') 
+        .upload(path, file, { upsert: false });
 
-      if (uploadError) {
-        // Handle specific error for already existing file
-        if (uploadError.message.includes('duplicate key value violates unique constraint')) {
-          throw new Error(`File already exists at path: ${path}. Please try again.`);
-        }
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
-      // Get the public URL for the uploaded file
-      const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(data.path);
-      
+      const { data: { publicUrl } } = supabase.storage.from('apps').getPublicUrl(data.path);
       return publicUrl;
     } catch (err: any) {
       console.error("Supabase Upload Error:", err);
