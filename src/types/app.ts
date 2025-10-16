@@ -16,8 +16,6 @@ export interface App {
   developerId: string;
   status: AppStatus;
   downloadCount: number;
-  
-  // THE FIX: Allow Timestamp OR a string representation for dates
-  createdAt: Timestamp | string; 
-  updatedAt?: Timestamp | string;
+  createdAt: Timestamp | string;
+  updatedAt: Timestamp | string; // THE FIX: This field was missing
 }
