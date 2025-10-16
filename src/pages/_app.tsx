@@ -1,7 +1,13 @@
+import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
-// CSS file abhi nahi hai to is line ko comment kar dein ya hata dein
-// import '@/styles/globals.css'
+import { AuthProvider } from '@/context/AuthContext'
+import Header from '@/components/common/Header'
 
 export default function App({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />
+  return (
+    <AuthProvider>
+      <Header />
+      <Component {...pageProps} />
+    </AuthProvider>
+  )
 }
