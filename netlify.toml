@@ -1,19 +1,22 @@
 [build]
   command = "npm run build"
-  publish = "out"
+  publish = ".next"  # "out" की जगह ".next" करें
 
 [build.environment]
   NODE_VERSION = "16"
 
-# Static export के लिए redirects और headers
+# Next.js के लिए यह redirects जरूरी हैं
+[[redirects]]
+  from = "/_next/static/*"
+  to = "/_next/static/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
