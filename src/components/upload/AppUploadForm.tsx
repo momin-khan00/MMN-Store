@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '../../context/AuthContext';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { useBackblaze } from '../../hooks/useSupabaseStorage';
+import { useSupabaseStorage } from '../../hooks/useSupabaseStorage';
 import { AppData } from '../../types/app';
 
 interface AppFormData {
