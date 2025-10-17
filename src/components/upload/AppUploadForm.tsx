@@ -3,17 +3,15 @@ import { useRouter } from 'next/router';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '@/config/firebase';
 import { useAuth } from '@/context/AuthContext';
-import { useSupabaseStorage } from '@/hooks/useSupabaseStorage';
+import { supabase } from '@/config/supabase'; // Direct import for simplicity
 
 export default function AppUploadForm() {
     const router = useRouter();
     const { user } = useAuth();
-    const { uploadFile, isUploading } = useSupabaseStorage();
-
+    
     const [formState, setFormState] = useState({ name: '', description: '', category: 'Tools', version: '' });
     const [files, setFiles] = useState<{ apk: File | null; icon: File | null }>({ apk: null, icon: null });
     const [statusMessage, setStatusMessage] = useState('');
-    const [isSuccess, setIsSuccess] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -28,26 +26,45 @@ export default function AppUploadForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user || !files.apk || !files.icon) {
-            setStatusMessage("Please fill all fields and select an APK and an icon.");
-            setIsSuccess(false);
+            setStatusMessage("Error: Please fill all fields and select both files.");
             return;
         }
 
         setIsSubmitting(true);
-        setIsSuccess(false);
-        setStatusMessage("Initiating upload...");
+        setStatusMessage("Starting submission...");
 
         try {
             const timestamp = Date.now();
+            let apkUrl = '';
+            let iconUrl = '';
 
-            setStatusMessage("Uploading APK file...");
+            // --- APK UPLOAD ---
+            setStatusMessage("1/4: Uploading APK file...");
             const apkPath = `apks/${user.uid}/${timestamp}-${files.apk.name}`;
-            const apkUrl = await uploadFile(files.apk, apkPath);
+            const { data: apkData, error: apkError } = await supabase.storage
+                .from('apps')
+                .upload(apkPath, files.apk);
 
-            setStatusMessage("Uploading App Icon...");
+            if (apkError) {
+                throw new Error(`APK Upload Failed: ${apkError.message}`);
+            }
+            apkUrl = supabase.storage.from('apps').getPublicUrl(apkData.path).data.publicUrl;
+            setStatusMessage("2/4: APK upload complete!");
+
+            // --- ICON UPLOAD ---
+            setStatusMessage("3/4: Uploading App Icon...");
             const iconPath = `icons/${user.uid}/${timestamp}-${files.icon.name}`;
-            const iconUrl = await uploadFile(files.icon, iconPath);
+            const { data: iconData, error: iconError } = await supabase.storage
+                .from('apps')
+                .upload(iconPath, files.icon);
 
+            if (iconError) {
+                throw new Error(`Icon Upload Failed: ${iconError.message}`);
+            }
+            iconUrl = supabase.storage.from('apps').getPublicUrl(iconData.path).data.publicUrl;
+            setStatusMessage("4/4: Icon upload complete!");
+            
+            // --- FIRESTORE SAVE ---
             setStatusMessage("Saving app details to database...");
             await addDoc(collection(firestore, 'apps'), {
                 name: formState.name,
@@ -66,15 +83,12 @@ export default function AppUploadForm() {
                 updatedAt: serverTimestamp(),
             });
 
-            setStatusMessage("App submitted successfully! The page will now reload.");
-            setIsSuccess(true);
-            setTimeout(() => router.reload(), 2500);
+            setStatusMessage("✅ Success! Your app is submitted for review.");
+            setTimeout(() => router.reload(), 3000);
 
         } catch (error: any) {
-            // This will now display the REAL, DETAILED error from Supabase
             console.error("Detailed Submission Error:", error);
-            setStatusMessage(`Upload Failed: ${error.message}`);
-            setIsSuccess(false);
+            setStatusMessage(`❌ FAILED: ${error.message}`);
         } finally {
             setIsSubmitting(false);
         }
@@ -84,7 +98,7 @@ export default function AppUploadForm() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Form Fields... (No changes here) */}
+            {/* Form Fields... */}
              <div>
                 <label className="block mb-2 font-semibold">App Name</label>
                 <input type="text" name="name" onChange={handleInputChange} required className={inputStyle} />
@@ -116,12 +130,12 @@ export default function AppUploadForm() {
                 </div>
             </div>
 
-            <button type="submit" disabled={isSubmitting || isUploading} className="w-full bg-accent hover:bg-accent-dark font-bold py-4 px-8 rounded-lg text-lg transition-colors duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed">
+            <button type="submit" disabled={isSubmitting} className="w-full bg-accent hover:bg-accent-dark font-bold py-4 px-8 rounded-lg text-lg transition-colors duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed">
                 {isSubmitting ? statusMessage : 'Submit for Review'}
             </button>
 
             {statusMessage && !isSubmitting && (
-                <p className={`text-center mt-4 ${isSuccess ? 'text-green-400' : 'text-red-400'}`}>
+                <p className="text-center mt-4">
                     {statusMessage}
                 </p>
             )}
