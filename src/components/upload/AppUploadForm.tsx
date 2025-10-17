@@ -42,16 +42,19 @@ export default function AppUploadForm() {
       
       setStatusMessage("Uploading APK file...");
       const apkPath = `apks/${user.uid}/${timestamp}-${files.apk.name}`;
-      // THE FIX: Calling uploadFile with exactly 2 arguments.
       const apkUrl = await uploadFile(files.apk, apkPath);
+
+      // Check for upload error after each upload
+      if (!apkUrl) {
+          throw new Error(uploadError || "Failed to upload APK. Please check file size and permissions.");
+      }
 
       setStatusMessage("Uploading App Icon...");
       const iconPath = `icons/${user.uid}/${timestamp}-${files.icon.name}`;
-      // THE FIX: Calling uploadFile with exactly 2 arguments.
       const iconUrl = await uploadFile(files.icon, iconPath);
-
-      if (!apkUrl || !iconUrl) {
-        throw new Error(uploadError || "Failed to upload files. Please check console and try again.");
+      
+      if (!iconUrl) {
+        throw new Error(uploadError || "Failed to upload App Icon. Please check file size and permissions.");
       }
 
       setStatusMessage("Saving app details to database...");
@@ -77,8 +80,10 @@ export default function AppUploadForm() {
       setTimeout(() => router.reload(), 2500);
 
     } catch (error: any) {
+      // This will now show the REAL error from Supabase
       setStatusMessage(`Error: ${error.message}`);
       setIsSuccess(false);
+      console.error("Submission Error:", error);
     } finally {
       setIsSubmitting(false);
     }
