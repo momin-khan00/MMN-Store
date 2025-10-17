@@ -15,15 +15,17 @@ export default function AdminDashboardPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-extrabold text-white">Admin Dashboard</h1>
-          <button onClick={refresh} className="text-sm text-brand-light hover:underline">Refresh List</button>
+          <button onClick={refresh} className="text-sm text-brand-light hover:underline disabled:text-gray-500" disabled={isLoading}>
+            {isLoading ? 'Refreshing...' : 'Refresh List'}
+          </button>
         </div>
 
         <div className="bg-dark-800 p-6 sm:p-8 rounded-2xl shadow-lg">
-          <h2 className="text-2xl font-bold mb-6 text-accent-light">Pending Approvals</h2>
+          <h2 className="text-2xl font-bold mb-6 text-accent-light">Pending Approvals ({pendingApps.length})</h2>
           
           {isLoading && <Loading />}
 
-          {error && <p className="text-red-500 text-center">{error}</p>}
+          {error && <p className="text-red-500 text-center py-5">{error}</p>}
           
           {!isLoading && !error && (
             <>
