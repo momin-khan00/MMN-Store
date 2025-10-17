@@ -10,13 +10,15 @@ interface PendingAppRowProps {
 
 export default function PendingAppRow({ app, onUpdateStatus }: PendingAppRowProps) {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [action, setAction] = useState<'approve' | 'reject' | null>(null);
+  // THE FIX: The state now correctly matches the status values
+  const [action, setAction] = useState<'approved' | 'rejected' | null>(null);
 
   const handleUpdate = async (newStatus: 'approved' | 'rejected') => {
+    // THE FIX: `setAction` is now receiving the correct type
     setAction(newStatus);
     setIsProcessing(true);
     await onUpdateStatus(app.id, newStatus);
-    // No need to set isProcessing back to false, as the component will be removed from the list on success
+    // Component will be removed, so no need to reset state
   };
 
   return (
@@ -24,7 +26,8 @@ export default function PendingAppRow({ app, onUpdateStatus }: PendingAppRowProp
       <div className="flex items-center space-x-4 w-full sm:w-auto">
         <Image src={app.iconUrl} alt={app.name} width={48} height={48} className="rounded-lg object-cover flex-shrink-0" />
         <div className="min-w-0 flex-1">
-          <Link href={`/app/${app.id}`} target="_blank" rel="noopener noreferrer" className="font-bold text-white hover:underline truncate block">{app.name}</Link>
+          {/* A temporary link to check app details; we need to adjust security rules for this to work for admins */}
+          <p className="font-bold text-white truncate block">{app.name}</p>
           <p className="text-sm text-gray-400 truncate">{app.developerName}</p>
         </div>
       </div>
@@ -34,14 +37,14 @@ export default function PendingAppRow({ app, onUpdateStatus }: PendingAppRowProp
           disabled={isProcessing}
           className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-md transition disabled:bg-gray-500 w-1/2 sm:w-auto"
         >
-          {isProcessing && action === 'approve' ? '...' : 'Approve'}
+          {isProcessing && action === 'approved' ? '...' : 'Approve'}
         </button>
         <button
           onClick={() => handleUpdate('rejected')}
           disabled={isProcessing}
           className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-md transition disabled:bg-gray-500 w-1/2 sm:w-auto"
         >
-          {isProcessing && action === 'reject' ? '...' : 'Reject'}
+          {isProcessing && action === 'rejected' ? '...' : 'Reject'}
         </button>
       </div>
     </div>
