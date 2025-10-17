@@ -6,7 +6,7 @@ import { firestore } from '@/config/firebase';
 import type { App } from '@/types/app';
 import { ParsedUrlQuery } from 'querystring';
 
-// We'll create a new type for the page props where dates are guaranteed to be strings
+// A specific type for the page props to ensure dates are strings
 interface AppForPage extends Omit<App, 'createdAt' | 'updatedAt'> {
   createdAt: string;
   updatedAt: string | null;
@@ -47,25 +47,33 @@ export const getServerSideProps: GetServerSideProps<AppDetailProps, Params> = as
 
 const AppDetailPage: NextPage<AppDetailProps> = ({ app }) => {
   if (!app) {
-    return <div className="text-center p-10">Error loading app details.</div>;
+    return <div className="text-center p-10">Error loading app details or app not found.</div>;
   }
+
+  // Sanitize the app name to create a clean filename
+  const sanitizedAppName = app.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const downloadFilename = `${sanitizedAppName}_v${app.version}.apk`;
   
-  // THE FIX for the Date error
   const lastUpdatedDate = new Date(app.updatedAt || app.createdAt).toLocaleDateString();
 
-  // Function to handle the download count
-  const handleDownload = async () => {
-    const appRef = doc(firestore, 'apps', app.id);
-    await updateDoc(appRef, {
-      downloadCount: increment(1)
-    });
+  // This function will run when the user clicks the download link
+  const handleDownloadClick = async () => {
+    try {
+      const appRef = doc(firestore, 'apps', app.id);
+      // Increment the download count in Firestore
+      await updateDoc(appRef, {
+        downloadCount: increment(1)
+      });
+    } catch (error) {
+      console.error("Failed to update download count:", error);
+    }
   };
 
   return (
     <>
       <Head><title>{app.name} - MMN Store</title></Head>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Section (Your preferred design) */}
+        {/* Header Section from your preferred design */}
         <header className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-8">
           <div className="flex-shrink-0">
             <Image src={app.iconUrl} alt={`${app.name} icon`} width={128} height={128} className="rounded-3xl object-cover" />
@@ -76,18 +84,20 @@ const AppDetailPage: NextPage<AppDetailProps> = ({ app }) => {
             <p className="text-md text-gray-400">{app.category}</p>
           </div>
           <div className="sm:ml-auto pt-4 sm:pt-0">
-            {/* THE FIX for the download URL */}
+            {/* THE FINAL, WORKING DOWNLOAD BUTTON */}
             <a 
-              href={`/.netlify/functions/download?fileUrl=${encodeURIComponent(app.apkUrl)}`}
-              onClick={handleDownload}
-              className="bg-accent hover:bg-accent-dark text-white font-bold py-4 px-8 rounded-full text-lg transition-colors duration-300 w-full sm:w-auto inline-block">
+              href={app.apkUrl} 
+              download={downloadFilename} // This tells the browser to download the file with this name
+              onClick={handleDownloadClick} // This updates the count
+              className="bg-accent hover:bg-accent-dark text-white font-bold py-4 px-8 rounded-full text-lg transition-colors duration-300 w-full sm:w-auto inline-block text-center"
+            >
               Download
             </a>
             <p className="text-center text-gray-500 text-sm mt-2">{app.downloadCount.toLocaleString()} downloads</p>
           </div>
         </header>
 
-        {/* Other sections (Your preferred design) */}
+        {/* Other sections... */}
         <section className="mb-8">
             <h2 className="text-2xl font-bold mb-4">Screenshots</h2>
             <div className="h-64 bg-dark-800 rounded-2xl flex items-center justify-center">
