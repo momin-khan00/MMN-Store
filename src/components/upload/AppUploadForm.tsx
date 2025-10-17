@@ -3,11 +3,10 @@ import { useRouter } from 'next/router';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '@/config/firebase';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/config/supabase';
 
 export default function AppUploadForm() {
     const router = useRouter();
-    const { user, firebaseUser } = useAuth(); // Get firebaseUser
+    const { user } = useAuth();
     
     const [formState, setFormState] = useState({ name: '', description: '', category: 'Tools', version: '' });
     const [files, setFiles] = useState<{ apk: File | null; icon: File | null }>({ apk: null, icon: null });
@@ -25,49 +24,51 @@ export default function AppUploadForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!user || !firebaseUser || !files.apk || !files.icon) {
-            setStatusMessage("Error: You must be logged in and select all files.");
+        if (!user || !files.apk || !files.icon) {
+            setStatusMessage("Error: Please fill all fields and select both files.");
             return;
         }
 
         setIsSubmitting(true);
-        setStatusMessage("Starting submission...");
+        setStatusMessage("Initializing secure upload...");
 
         try {
-            // STEP 1: Get the Firebase ID Token (The User's ID Card)
-            setStatusMessage("1/5: Verifying user authentication...");
-            const token = await firebaseUser.getIdToken();
+            // Step 1: Call our Netlify Function to get secure URLs
+            setStatusMessage("1/4: Preparing secure storage...");
+            const response = await fetch('/.netlify/functions/createSignedUrls', {
+                method: 'POST',
+                body: JSON.stringify({
+                    uid: user.uid,
+                    apkFileName: files.apk.name,
+                    iconFileName: files.icon.name,
+                }),
+            });
 
-            // STEP 2: Show the ID Card to Supabase Security
-            setStatusMessage("2/5: Authenticating with storage...");
-            supabase.auth.setSession({ access_token: token, refresh_token: 'dummy' });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to prepare upload.');
+            }
 
-            const timestamp = Date.now();
-            let apkUrl = '';
-            let iconUrl = '';
+            const { apkSignedUrl, iconSignedUrl, apkUrl, iconUrl } = await response.json();
 
-            // STEP 3: Upload APK
-            setStatusMessage("3/5: Uploading APK file...");
-            const apkPath = `apks/${user.uid}/${timestamp}-${files.apk.name}`;
-            const { data: apkData, error: apkError } = await supabase.storage
-                .from('apps')
-                .upload(apkPath, files.apk);
+            // Step 2: Upload APK using the secure URL
+            setStatusMessage("2/4: Uploading APK file...");
+            await fetch(apkSignedUrl, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/vnd.android.package-archive' },
+                body: files.apk,
+            });
 
-            if (apkError) throw apkError;
-            apkUrl = supabase.storage.from('apps').getPublicUrl(apkData.path).data.publicUrl;
-            
-            // STEP 4: Upload Icon
-            setStatusMessage("4/5: Uploading App Icon...");
-            const iconPath = `icons/${user.uid}/${timestamp}-${files.icon.name}`;
-            const { data: iconData, error: iconError } = await supabase.storage
-                .from('apps')
-                .upload(iconPath, files.icon);
+            // Step 3: Upload Icon using the secure URL
+            setStatusMessage("3/4: Uploading App Icon...");
+            await fetch(iconSignedUrl, {
+                method: 'PUT',
+                headers: { 'Content-Type': files.icon.type },
+                body: files.icon,
+            });
 
-            if (iconError) throw iconError;
-            iconUrl = supabase.storage.from('apps').getPublicUrl(iconData.path).data.publicUrl;
-            
-            // STEP 5: Save to Firestore
-            setStatusMessage("5/5: Saving app details...");
+            // Step 4: Save metadata to Firestore
+            setStatusMessage("4/4: Saving app details...");
             await addDoc(collection(firestore, 'apps'), {
                 name: formState.name, description: formState.description, category: formState.category,
                 version: formState.version, apkUrl, iconUrl, screenshots: [], developerId: user.uid,
@@ -97,7 +98,7 @@ export default function AppUploadForm() {
             </div>
             <div>
                 <label className="block mb-2 font-semibold">Description</label>
-                <textarea name="description" rows={4} onChange={handleInputChange} required className={inputStyle}></textarea>
+                <textarea name="description" rows={4} onChange(handleInputChange) required className={inputStyle}></textarea>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
