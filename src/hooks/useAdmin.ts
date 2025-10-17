@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy, doc, updateDoc, writeBatch } from 'firebase/firestore';
+import { useState, useEffect, useCallback } from 'react';
+import { collection, query, where, getDocs, orderBy, doc, updateDoc } from 'firebase/firestore';
 import { firestore } from '@/config/firebase';
 import type { App } from '@/types/app';
 
@@ -9,7 +9,7 @@ export function useAdmin() {
   const [error, setError] = useState<string | null>(null);
 
   // Function to fetch all apps with 'pending' status
-  const fetchPendingApps = async () => {
+  const fetchPendingApps = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -24,12 +24,12 @@ export function useAdmin() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // Effect to fetch apps when the hook is used
   useEffect(() => {
     fetchPendingApps();
-  }, []);
+  }, [fetchPendingApps]);
 
   // Function to update an app's status
   const updateAppStatus = async (appId: string, newStatus: 'approved' | 'rejected') => {
