@@ -33,10 +33,10 @@ export default function AppUploadForm() {
         setStatusMessage("Initializing secure upload...");
 
         try {
-            // Step 1: Call our Netlify Function to get secure URLs
             setStatusMessage("1/4: Preparing secure storage...");
             const response = await fetch('/.netlify/functions/createSignedUrls', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     uid: user.uid,
                     apkFileName: files.apk.name,
@@ -46,28 +46,27 @@ export default function AppUploadForm() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to prepare upload.');
+                throw new Error(errorData.error || 'Failed to prepare upload from server.');
             }
 
             const { apkSignedUrl, iconSignedUrl, apkUrl, iconUrl } = await response.json();
 
-            // Step 2: Upload APK using the secure URL
             setStatusMessage("2/4: Uploading APK file...");
-            await fetch(apkSignedUrl, {
+            const apkUploadResponse = await fetch(apkSignedUrl, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/vnd.android.package-archive' },
                 body: files.apk,
             });
+            if (!apkUploadResponse.ok) throw new Error('APK file could not be uploaded.');
 
-            // Step 3: Upload Icon using the secure URL
             setStatusMessage("3/4: Uploading App Icon...");
-            await fetch(iconSignedUrl, {
+            const iconUploadResponse = await fetch(iconSignedUrl, {
                 method: 'PUT',
                 headers: { 'Content-Type': files.icon.type },
                 body: files.icon,
             });
+            if (!iconUploadResponse.ok) throw new Error('App Icon could not be uploaded.');
 
-            // Step 4: Save metadata to Firestore
             setStatusMessage("4/4: Saving app details...");
             await addDoc(collection(firestore, 'apps'), {
                 name: formState.name, description: formState.description, category: formState.category,
@@ -91,25 +90,27 @@ export default function AppUploadForm() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Form Fields... */}
-             <div>
+            <div>
                 <label className="block mb-2 font-semibold">App Name</label>
-                <input type="text" name="name" onChange={handleInputChange} required className={inputStyle} />
+                <input type="text" name="name" value={formState.name} onChange={handleInputChange} required className={inputStyle} />
             </div>
             <div>
                 <label className="block mb-2 font-semibold">Description</label>
-                <textarea name="description" rows={4} onChange(handleInputChange) required className={inputStyle}></textarea>
+                <textarea name="description" value={formState.description} rows={4} onChange={handleInputChange} required className={inputStyle}></textarea>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label className="block mb-2 font-semibold">Category</label>
-                    <select name="category" onChange={handleInputChange} className={inputStyle}>
-                        <option>Tools</option><option>Productivity</option><option>Games</option><option>Social</option>
+                    <select name="category" value={formState.category} onChange={handleInputChange} className={inputStyle}>
+                        <option>Tools</option>
+                        <option>Productivity</option>
+                        <option>Games</option>
+                        <option>Social</option>
                     </select>
                 </div>
                 <div>
                     <label className="block mb-2 font-semibold">Version (e.g., 1.0.0)</label>
-                    <input type="text" name="version" onChange={handleInputChange} required className={inputStyle} />
+                    <input type="text" name="version" value={formState.version} onChange={handleInputChange} required className={inputStyle} />
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
