@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { collection, query, where, getDocs, orderBy, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '@/config/firebase';
 import type { App } from '@/types/app';
 
@@ -8,7 +8,6 @@ export function useAdmin() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Function to fetch all apps with 'pending' status
   const fetchPendingApps = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -26,26 +25,23 @@ export function useAdmin() {
     }
   }, []);
 
-  // Effect to fetch apps when the hook is used
   useEffect(() => {
     fetchPendingApps();
   }, [fetchPendingApps]);
 
-  // Function to update an app's status
   const updateAppStatus = async (appId: string, newStatus: 'approved' | 'rejected') => {
     try {
       const appRef = doc(firestore, 'apps', appId);
       await updateDoc(appRef, {
         status: newStatus,
-        updatedAt: new Date(), // Set the update timestamp
+        updatedAt: serverTimestamp(), // Use server timestamp for accuracy
       });
-      // Remove the app from the local state to update the UI instantly
       setPendingApps(prevApps => prevApps.filter(app => app.id !== appId));
-      return true; // Indicate success
+      return true;
     } catch (err: any) {
       console.error("Error updating app status:", err);
       setError(`Failed to update status for app ${appId}.`);
-      return false; // Indicate failure
+      return false;
     }
   };
 
