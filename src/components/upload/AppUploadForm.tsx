@@ -1,11 +1,15 @@
 import { useState } from 'react';
-import { useRouter } from 'next/router';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '@/config/firebase';
 import { useAuth } from '@/context/AuthContext';
+import type { App } from '@/types/app';
 
-export default function AppUploadForm() {
-    const router = useRouter();
+// THE FIX: We are defining the props for this component
+interface AppUploadFormProps {
+    onUploadSuccess: () => void;
+}
+
+export default function AppUploadForm({ onUploadSuccess }: AppUploadFormProps) {
     const { user } = useAuth();
     
     const [formState, setFormState] = useState({ name: '', description: '', category: 'Tools', version: '' });
@@ -33,7 +37,6 @@ export default function AppUploadForm() {
         setStatusMessage("Initializing secure upload...");
 
         try {
-            setStatusMessage("1/4: Preparing secure storage...");
             const response = await fetch('/.netlify/functions/createSignedUrls', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -51,23 +54,18 @@ export default function AppUploadForm() {
 
             const { apkSignedUrl, iconSignedUrl, apkUrl, iconUrl } = await response.json();
 
-            setStatusMessage("2/4: Uploading APK file...");
-            const apkUploadResponse = await fetch(apkSignedUrl, {
+            await fetch(apkSignedUrl, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/vnd.android.package-archive' },
                 body: files.apk,
             });
-            if (!apkUploadResponse.ok) throw new Error('APK file could not be uploaded.');
 
-            setStatusMessage("3/4: Uploading App Icon...");
-            const iconUploadResponse = await fetch(iconSignedUrl, {
+            await fetch(iconSignedUrl, {
                 method: 'PUT',
                 headers: { 'Content-Type': files.icon.type },
                 body: files.icon,
             });
-            if (!iconUploadResponse.ok) throw new Error('App Icon could not be uploaded.');
 
-            setStatusMessage("4/4: Saving app details...");
             await addDoc(collection(firestore, 'apps'), {
                 name: formState.name, description: formState.description, category: formState.category,
                 version: formState.version, apkUrl, iconUrl, screenshots: [], developerId: user.uid,
@@ -76,7 +74,9 @@ export default function AppUploadForm() {
             });
 
             setStatusMessage("✅ Success! Your app is submitted.");
-            setTimeout(() => router.reload(), 3000);
+            setTimeout(() => {
+                onUploadSuccess(); // Call the success handler from props
+            }, 2000);
 
         } catch (error: any) {
             console.error("Detailed Submission Error:", error);
@@ -90,27 +90,25 @@ export default function AppUploadForm() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
+            {/* Form Fields... */}
+             <div>
                 <label className="block mb-2 font-semibold">App Name</label>
-                <input type="text" name="name" value={formState.name} onChange={handleInputChange} required className={inputStyle} />
+                <input type="text" name="name" onChange={handleInputChange} required className={inputStyle} />
             </div>
             <div>
                 <label className="block mb-2 font-semibold">Description</label>
-                <textarea name="description" value={formState.description} rows={4} onChange={handleInputChange} required className={inputStyle}></textarea>
+                <textarea name="description" rows={4} onChange={handleInputChange} required className={inputStyle}></textarea>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label className="block mb-2 font-semibold">Category</label>
-                    <select name="category" value={formState.category} onChange={handleInputChange} className={inputStyle}>
-                        <option>Tools</option>
-                        <option>Productivity</option>
-                        <option>Games</option>
-                        <option>Social</option>
+                    <select name="category" onChange={handleInputChange} className={inputStyle}>
+                        <option>Tools</option><option>Productivity</option><option>Games</option><option>Social</option>
                     </select>
                 </div>
                 <div>
                     <label className="block mb-2 font-semibold">Version (e.g., 1.0.0)</label>
-                    <input type="text" name="version" value={formState.version} onChange={handleInputChange} required className={inputStyle} />
+                    <input type="text" name="version" onChange={handleInputChange} required className={inputStyle} />
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
