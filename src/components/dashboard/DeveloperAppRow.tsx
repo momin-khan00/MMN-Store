@@ -1,8 +1,8 @@
 import type { App } from '@/types/app';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Edit, Trash2 } from 'react-feather';
 
-// THE FIX: The type for onDelete now correctly expects the full App object
 interface DeveloperAppRowProps {
   app: App;
   onDelete: (app: App) => void;
@@ -30,10 +30,9 @@ export default function DeveloperAppRow({ app, onDelete }: DeveloperAppRowProps)
       </div>
       <div className="flex items-center space-x-4 flex-shrink-0">
         <StatusBadge status={app.status} />
-        <button className="text-gray-400 hover:text-brand-light transition" title="Update App (Coming Soon)">
+        <Link href={`/dashboard/update/${app.id}`} className="text-gray-400 hover:text-brand-light transition" title="Update App">
           <Edit size={18} />
-        </button>
-        {/* This now correctly calls onDelete with the full 'app' object */}
+        </Link>
         <button onClick={() => onDelete(app)} className="text-gray-400 hover:text-red-500 transition" title="Delete App">
           <Trash2 size={18} />
         </button>
