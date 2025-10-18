@@ -18,4 +18,7 @@ export interface App {
   downloadCount: number;
   createdAt: Timestamp | string;
   updatedAt: Timestamp | string; // THE FIX: This field was missing
+  
+  // NEW FIELD
+  isFlagged?: boolean;
 }
