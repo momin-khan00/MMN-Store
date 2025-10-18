@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="mb-4 space-x-6">
           {/* Link for Developers */}
           {(user?.role === 'developer' || user?.role === 'admin') && (
-            <Link href="/dashboard/developer" className="text-accent hover:underline">
+            <Link href="/dashboard/developer" className="text-brand hover:underline">
               Developer Dashboard
             </Link>
           )}
