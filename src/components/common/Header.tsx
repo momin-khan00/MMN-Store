@@ -1,38 +1,41 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { auth } from '@/config/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import ThemeChanger from './ThemeChanger'; // Import the new ThemeChanger
 
 export default function Header() {
   const { user } = useAuth();
 
   const handleSignIn = async () => {
     const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error("Google Sign-In Error:", error);
-      // You can add a user-facing error message here
-    }
+    await signInWithPopup(auth, provider);
   };
 
   return (
-    <header className="bg-dark-800 text-white shadow-md sticky top-0 z-50">
+    <header className="bg-white/80 dark:bg-dark-800/80 backdrop-blur-md sticky top-0 z-50 shadow-sm dark:shadow-none border-b border-gray-200 dark:border-dark-700">
       <nav className="container mx-auto flex justify-between items-center p-4">
-        <Link href="/" className="text-xl font-bold hover:text-brand-light transition-colors">
+        <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white hover:text-brand-light transition-colors">
           MMN Store
         </Link>
-        <div>
+        <div className="flex items-center space-x-4">
+          <ThemeChanger />
           {user ? (
-            <div className="flex items-center space-x-4">
-              <span className="text-sm hidden sm:block">Welcome, {user.name.split(' ')[0]}</span>
-              <button onClick={() => signOut(auth)} className="bg-red-600 px-3 py-1.5 text-sm font-semibold rounded-md hover:bg-red-700 transition-colors">
-                Logout
-              </button>
-            </div>
+            <Link href="/profile">
+              <a className="block">
+                <Image
+                  src={user.avatarUrl || '/icons/default-avatar.png'}
+                  alt="My Profile"
+                  width={36}
+                  height={36}
+                  className="rounded-full object-cover border-2 border-transparent hover:border-brand transition"
+                />
+              </a>
+            </Link>
           ) : (
-            <button onClick={handleSignIn} className="bg-blue-600 px-3 py-1.5 text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors">
-              Login with Google
+            <button onClick={handleSignIn} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-semibold rounded-md transition-colors">
+              Login
             </button>
           )}
         </div>
