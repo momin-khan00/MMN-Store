@@ -41,9 +41,8 @@ export default function DeveloperDashboardPage() {
         <title>Developer Dashboard - MMN Store</title>
       </Head>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* The rest of the page remains the same */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-extrabold text-white">Developer Dashboard</h1>
+          <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white">Developer Dashboard</h1>
           {!isFormVisible && (
             <button 
               onClick={() => setIsFormVisible(true)}
@@ -56,19 +55,19 @@ export default function DeveloperDashboardPage() {
         </div>
         
         {isFormVisible && (
-          <div className="bg-dark-800 p-6 sm:p-8 rounded-2xl shadow-lg mb-12 relative">
-            <button onClick={() => setIsFormVisible(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+          <div className="bg-white dark:bg-dark-800 p-6 sm:p-8 rounded-2xl shadow-lg mb-12 relative">
+            <button onClick={() => setIsFormVisible(false)} className="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
               <X size={24} />
             </button>
-            <h2 className="text-2xl font-bold mb-6 text-brand-light">Upload New App</h2>
+            <h2 className="text-2xl font-bold mb-6 text-brand">Upload New App</h2>
             <AppUploadForm onUploadSuccess={onUploadSuccess} />
           </div>
         )}
 
-        <div className="bg-dark-800 p-6 sm:p-8 rounded-2xl shadow-lg">
+        <div className="bg-white dark:bg-dark-800 p-6 sm:p-8 rounded-2xl shadow-lg">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">My Apps ({apps.length})</h2>
-              <button onClick={refresh} className="text-sm text-brand-light hover:underline" disabled={isLoading}>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">My Apps ({apps.length})</h2>
+              <button onClick={refresh} className="text-sm text-brand hover:underline" disabled={isLoading}>
                 {isLoading ? '...' : 'Refresh'}
               </button>
             </div>
@@ -81,7 +80,7 @@ export default function DeveloperDashboardPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-400 text-center py-5">You haven't uploaded any apps yet. Click 'Upload New App' to get started.</p>
+              <p className="text-gray-500 dark:text-gray-400 text-center py-5">You haven't uploaded any apps yet. Click 'Upload New App' to get started.</p>
             )}
         </div>
       </div>
