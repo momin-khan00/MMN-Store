@@ -12,19 +12,18 @@ export default function Home() {
         <title>MMN Store - Discover Amazing Apps</title>
       </Head>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Featured Section Placeholder */}
         <section className="mb-12">
-          <h2 className="text-3xl font-extrabold text-white mb-4">Featured Apps</h2>
-          <div className="h-64 bg-dark-800 rounded-2xl flex items-center justify-center">
-            <p className="text-gray-500">Carousel Coming Soon...</p>
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-4">Featured Apps</h2>
+          <div className="h-64 bg-gray-200 dark:bg-dark-800 rounded-2xl flex items-center justify-center">
+            <p className="text-gray-500 dark:text-gray-400">Carousel Coming Soon...</p>
           </div>
         </section>
 
         {/* App Grid Section */}
         <section>
-          <h2 className="text-3xl font-extrabold text-white mb-4">Discover Apps</h2>
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-4">Discover Apps</h2>
           {loading && <Loading />}
-          {error && <p className="text-red-500">Error loading apps. Please try again later.</p>}
+          {error && <p className="text-center text-red-500 bg-red-100 dark:bg-dark-800 p-8 rounded-2xl">Error loading apps. Please try again later.</p>}
           {!loading && !error && (
             <>
               {apps.length > 0 ? (
@@ -34,8 +33,8 @@ export default function Home() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-10 bg-dark-800 rounded-2xl">
-                  <p className="text-gray-400">No apps found. Check back later!</p>
+                <div className="text-center py-10 bg-gray-200 dark:bg-dark-800 rounded-2xl">
+                  <p className="text-gray-500 dark:text-gray-400">No apps found. Check back later!</p>
                 </div>
               )}
             </>
