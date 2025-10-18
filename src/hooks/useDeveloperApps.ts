@@ -9,8 +9,9 @@ import type { App } from '@/types/app';
 const getPathFromUrl = (url: string) => {
   try {
     const urlObject = new URL(url);
-    // The path is everything after '/apps/'
-    return urlObject.pathname.split('/apps/')[1];
+    // Path is everything after the bucket name in the pathname
+    const pathParts = urlObject.pathname.split('/');
+    return pathParts.slice(2).join('/'); // e.g., /apps/apks/userid/file.apk -> apks/userid/file.apk
   } catch (error) {
     console.error("Invalid URL for storage object:", url);
     return null;
@@ -48,23 +49,18 @@ export function useDeveloperApps() {
 
   const deleteApp = async (app: App) => {
     try {
-      // 1. Delete files from Supabase Storage
       const filesToDelete: string[] = [];
       const apkPath = getPathFromUrl(app.apkUrl);
       const iconPath = getPathFromUrl(app.iconUrl);
       if (apkPath) filesToDelete.push(apkPath);
       if (iconPath) filesToDelete.push(iconPath);
-      // We will add screenshots here later
-
+      
       if (filesToDelete.length > 0) {
         const { error: storageError } = await supabase.storage.from('apps').remove(filesToDelete);
         if (storageError) throw new Error(`Supabase Error: ${storageError.message}`);
       }
 
-      // 2. Delete the document from Firestore
       await deleteDoc(doc(firestore, 'apps', app.id));
-      
-      // 3. Update UI
       setApps(prevApps => prevApps.filter(a => a.id !== app.id));
       return true;
     } catch (error) {
