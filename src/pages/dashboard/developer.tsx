@@ -5,17 +5,24 @@ import AppUploadForm from '@/components/upload/AppUploadForm';
 import { useDeveloperApps } from '@/hooks/useDeveloperApps';
 import DeveloperAppRow from '@/components/dashboard/DeveloperAppRow';
 import Loading from '@/components/common/Loading';
-import { Plus } from 'react-feather';
+import { Plus, X } from 'react-feather';
+import type { App } from '@/types/app';
 
 export default function DeveloperDashboardPage() {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const { apps, isLoading, deleteApp, refresh } = useDeveloperApps();
 
-  const handleDelete = (appId: string, appName: string) => {
-    if (window.confirm(`Are you sure you want to delete "${appName}"? This action cannot be undone.`)) {
-      deleteApp(appId);
+  const handleDelete = async (app: App) => {
+    if (window.confirm(`Are you sure you want to delete "${app.name}"? This will permanently remove the app and its files.`)) {
+      await deleteApp(app);
     }
   };
+
+  // When form is submitted successfully, hide it and refresh the list
+  const onUploadSuccess = () => {
+    setIsFormVisible(false);
+    refresh();
+  }
 
   return (
     <ProtectedRoute allowedRoles={['developer', 'admin']}>
@@ -36,18 +43,17 @@ export default function DeveloperDashboardPage() {
           )}
         </div>
         
-        {/* The Upload Form is now conditional */}
         {isFormVisible && (
-          <div className="bg-dark-800 p-6 sm:p-8 rounded-2xl shadow-lg mb-12">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-brand-light">Upload New App</h2>
-              <button onClick={() => setIsFormVisible(false)} className="text-gray-400 hover:text-white">Close</button>
-            </div>
-            <AppUploadForm />
+          <div className="bg-dark-800 p-6 sm:p-8 rounded-2xl shadow-lg mb-12 relative">
+            <button onClick={() => setIsFormVisible(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+              <X size={24} />
+            </button>
+            <h2 className="text-2xl font-bold mb-6 text-brand-light">Upload New App</h2>
+            {/* We'll pass a success handler to the form */}
+            <AppUploadForm onUploadSuccess={onUploadSuccess} />
           </div>
         )}
 
-        {/* The "My Apps" List */}
         <div className="bg-dark-800 p-6 sm:p-8 rounded-2xl shadow-lg">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">My Apps ({apps.length})</h2>
@@ -64,7 +70,7 @@ export default function DeveloperDashboardPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-400 text-center py-5">You haven't uploaded any apps yet.</p>
+              <p className="text-gray-400 text-center py-5">You haven't uploaded any apps yet. Click 'Upload New App' to get started.</p>
             )}
         </div>
       </div>
