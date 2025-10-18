@@ -1,10 +1,9 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '@/config/firebase';
 import { useAuth } from '@/context/AuthContext';
-import type { App } from '@/types/app';
 
-// THE FIX: We are defining the props for this component
 interface AppUploadFormProps {
     onUploadSuccess: () => void;
 }
@@ -66,16 +65,18 @@ export default function AppUploadForm({ onUploadSuccess }: AppUploadFormProps) {
                 body: files.icon,
             });
 
+            // THE PERMANENT FIX: Add isFlagged on creation
             await addDoc(collection(firestore, 'apps'), {
                 name: formState.name, description: formState.description, category: formState.category,
                 version: formState.version, apkUrl, iconUrl, screenshots: [], developerId: user.uid,
                 developerName: user.name, status: 'pending', downloadCount: 0, rating: 0,
+                isFlagged: false, // <-- THIS LINE IS THE FIX
                 createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
             });
 
             setStatusMessage("✅ Success! Your app is submitted.");
             setTimeout(() => {
-                onUploadSuccess(); // Call the success handler from props
+                onUploadSuccess();
             }, 2000);
 
         } catch (error: any) {
@@ -86,7 +87,7 @@ export default function AppUploadForm({ onUploadSuccess }: AppUploadFormProps) {
         }
     };
 
-    const inputStyle = "w-full p-3 bg-dark-900 border border-dark-600 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand transition";
+    const inputStyle = "w-full p-3 bg-white dark:bg-dark-900 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand transition";
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
