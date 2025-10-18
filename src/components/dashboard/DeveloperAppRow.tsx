@@ -1,10 +1,11 @@
 import type { App } from '@/types/app';
 import Image from 'next/image';
-import { Edit, Trash2 } from 'react-feather'; // We will install this icon library
+import { Edit, Trash2 } from 'react-feather';
 
+// THE FIX: The type for onDelete now correctly expects the full App object
 interface DeveloperAppRowProps {
   app: App;
-  onDelete: (appId: string, appName: string) => void;
+  onDelete: (app: App) => void;
 }
 
 const StatusBadge = ({ status }: { status: App['status'] }) => {
@@ -20,19 +21,20 @@ const StatusBadge = ({ status }: { status: App['status'] }) => {
 export default function DeveloperAppRow({ app, onDelete }: DeveloperAppRowProps) {
   return (
     <div className="flex items-center justify-between p-3 bg-dark-900 rounded-lg border border-dark-700">
-      <div className="flex items-center space-x-3">
-        <Image src={app.iconUrl} alt={app.name} width={40} height={40} className="rounded-md object-cover" />
+      <div className="flex items-center space-x-3 flex-1 min-w-0">
+        <Image src={app.iconUrl} alt={app.name} width={40} height={40} className="rounded-md object-cover flex-shrink-0" />
         <div className="min-w-0">
           <p className="font-bold text-white truncate">{app.name}</p>
           <p className="text-sm text-gray-400">v{app.version}</p>
         </div>
       </div>
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4 flex-shrink-0">
         <StatusBadge status={app.status} />
         <button className="text-gray-400 hover:text-brand-light transition" title="Update App (Coming Soon)">
           <Edit size={18} />
         </button>
-        <button onClick={() => onDelete(app.id, app.name)} className="text-gray-400 hover:text-red-500 transition" title="Delete App">
+        {/* This now correctly calls onDelete with the full 'app' object */}
+        <button onClick={() => onDelete(app)} className="text-gray-400 hover:text-red-500 transition" title="Delete App">
           <Trash2 size={18} />
         </button>
       </div>
