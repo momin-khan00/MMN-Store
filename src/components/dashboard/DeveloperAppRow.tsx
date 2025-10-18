@@ -20,7 +20,7 @@ const StatusBadge = ({ status }: { status: App['status'] }) => {
 
 export default function DeveloperAppRow({ app, onDelete }: DeveloperAppRowProps) {
   return (
-    <div className="flex items-center justify-between p-3 bg-dark-900 rounded-lg border border-dark-700">
+    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-900 rounded-lg border border-dark-700">
       <div className="flex items-center space-x-3 flex-1 min-w-0">
         <Image src={app.iconUrl} alt={app.name} width={40} height={40} className="rounded-md object-cover flex-shrink-0" />
         <div className="min-w-0">
