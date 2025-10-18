@@ -12,13 +12,14 @@ export default function DeveloperDashboardPage() {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const { apps, isLoading, deleteApp, refresh } = useDeveloperApps();
 
+  // THE FIX: The function now receives the full 'app' object
   const handleDelete = async (app: App) => {
     if (window.confirm(`Are you sure you want to delete "${app.name}"? This will permanently remove the app and its files.`)) {
+      // THE FIX: We pass the full 'app' object to the hook
       await deleteApp(app);
     }
   };
 
-  // When form is submitted successfully, hide it and refresh the list
   const onUploadSuccess = () => {
     setIsFormVisible(false);
     refresh();
@@ -49,7 +50,6 @@ export default function DeveloperDashboardPage() {
               <X size={24} />
             </button>
             <h2 className="text-2xl font-bold mb-6 text-brand-light">Upload New App</h2>
-            {/* We'll pass a success handler to the form */}
             <AppUploadForm onUploadSuccess={onUploadSuccess} />
           </div>
         )}
