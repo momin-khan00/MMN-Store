@@ -6,8 +6,10 @@ import type { App } from '@/types/app';
 import { ParsedUrlQuery } from 'querystring';
 import ProtectedRoute from '@/components/common/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
+import AppUpdateForm from '@/components/update/AppUpdateForm'; // Import the new form
+import Link from 'next/link';
 
-// We'll create a type for the page props where dates are guaranteed to be strings
+// Use the existing type for page props where dates are strings
 interface AppForPage extends Omit<App, 'createdAt' | 'updatedAt'> {
   createdAt: string;
   updatedAt: string | null;
@@ -27,12 +29,9 @@ export const getServerSideProps: GetServerSideProps<UpdatePageProps, Params> = a
     const appRef = doc(firestore, 'apps', id);
     const docSnap = await getDoc(appRef);
 
-    if (!docSnap.exists()) {
-      return { notFound: true };
-    }
+    if (!docSnap.exists()) return { notFound: true };
     
     const appData = docSnap.data();
-    
     const serializedApp: AppForPage = {
       id: docSnap.id, ...appData,
       createdAt: (appData.createdAt as Timestamp).toDate().toISOString(),
@@ -53,23 +52,24 @@ const UpdateAppPage: NextPage<UpdatePageProps> = ({ app }) => {
         return <div className="text-center p-10">App not found.</div>;
     }
 
-    // Security Check: Ensure the logged-in user is the owner of this app
-    if (user?.uid !== app.developerId) {
-        return <div className="text-center p-10">Access Denied: You are not the developer of this app.</div>;
+    // Security Check: Ensure the logged-in user is the owner of this app (or an admin)
+    if (user && user.uid !== app.developerId && user.role !== 'admin') {
+        return <div className="text-center p-10">Access Denied: You do not have permission to edit this app.</div>;
     }
 
-    // TODO: Build the update form here. For now, it's a placeholder.
     return (
         <ProtectedRoute allowedRoles={['developer', 'admin']}>
             <Head>
                 <title>Update {app.name} - MMN Store</title>
             </Head>
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <Link href="/dashboard/developer" className="text-brand-light hover:underline mb-8 inline-block">
+                    &larr; Back to Dashboard
+                </Link>
                 <h1 className="text-4xl font-extrabold text-white mb-8">Update "{app.name}"</h1>
 
                 <div className="bg-dark-800 p-6 sm:p-8 rounded-2xl shadow-lg">
-                    <p className="text-xl text-brand-light mb-4">Update form is coming in the next step!</p>
-                    <p>You will be able to update the app name, description, and upload new APK/Icon files here.</p>
+                    <AppUpdateForm app={app as App} />
                 </div>
             </div>
         </ProtectedRoute>
