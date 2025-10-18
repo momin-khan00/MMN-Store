@@ -7,16 +7,26 @@ import DeveloperAppRow from '@/components/dashboard/DeveloperAppRow';
 import Loading from '@/components/common/Loading';
 import { Plus, X } from 'react-feather';
 import type { App } from '@/types/app';
+import ConfirmModal from '@/components/common/ConfirmModal'; // Import the new modal
 
 export default function DeveloperDashboardPage() {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const { apps, isLoading, deleteApp, refresh } = useDeveloperApps();
 
-  // THE FIX: The function now receives the full 'app' object
-  const handleDelete = async (app: App) => {
-    if (window.confirm(`Are you sure you want to delete "${app.name}"? This will permanently remove the app and its files.`)) {
-      // THE FIX: We pass the full 'app' object to the hook
-      await deleteApp(app);
+  // State for the confirmation modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [appToDelete, setAppToDelete] = useState<App | null>(null);
+
+  const handleDeleteClick = (app: App) => {
+    setAppToDelete(app);
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (appToDelete) {
+      await deleteApp(appToDelete);
+      setAppToDelete(null);
+      setIsModalOpen(false);
     }
   };
 
@@ -31,6 +41,7 @@ export default function DeveloperDashboardPage() {
         <title>Developer Dashboard - MMN Store</title>
       </Head>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* The rest of the page remains the same */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-extrabold text-white">Developer Dashboard</h1>
           {!isFormVisible && (
@@ -66,7 +77,7 @@ export default function DeveloperDashboardPage() {
             ) : apps.length > 0 ? (
               <div className="space-y-3">
                 {apps.map(app => (
-                  <DeveloperAppRow key={app.id} app={app} onDelete={handleDelete} />
+                  <DeveloperAppRow key={app.id} app={app} onDelete={handleDeleteClick} />
                 ))}
               </div>
             ) : (
@@ -74,6 +85,15 @@ export default function DeveloperDashboardPage() {
             )}
         </div>
       </div>
+
+      {/* The Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete "${appToDelete?.name}"? This will permanently remove the app and all its files from storage.`}
+      />
     </ProtectedRoute>
   );
 }
