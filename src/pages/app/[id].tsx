@@ -79,9 +79,11 @@ const AppDetailPage: NextPage<AppDetailProps> = ({ app }) => {
             <Image src={app.iconUrl} alt={`${app.name} icon`} width={128} height={128} className="rounded-3xl object-cover" />
           </div>
           <div className="text-center sm:text-left">
-            <h1 className="text-4xl font-extrabold text-white">{app.name}</h1>
+            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white">{app.name}</h1>
             <p className="text-xl text-brand-light mt-1">{app.developerName}</p>
-            <p className="text-md text-gray-400">{app.category}</p>
+            <Link href={`/category/${app.category.toLowerCase()}`}>
+                <p className="text-md text-gray-500 dark:text-gray-400 hover:underline cursor-pointer">{app.category}</p>
+            </Link>
           </div>
           <div className="sm:ml-auto pt-4 sm:pt-0">
             {/* THE FINAL, WORKING DOWNLOAD BUTTON */}
@@ -99,21 +101,21 @@ const AppDetailPage: NextPage<AppDetailProps> = ({ app }) => {
 
         {/* Other sections... */}
         <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Screenshots</h2>
-            <div className="h-64 bg-dark-800 rounded-2xl flex items-center justify-center">
-                <p className="text-gray-500">Screenshots Coming Soon...</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Screenshots</h2>
+            <div className="h-64 bg-gray-200 dark:bg-dark-800 rounded-2xl flex items-center justify-center">
+                <p className="text-gray-500 dark:text-gray-400">Screenshots Coming Soon...</p>
             </div>
         </section>
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Description</h2>
-          <p className="text-gray-300 whitespace-pre-wrap leading-relaxed">{app.description}</p>
+        <section className="mb-8 bg-white dark:bg-dark-800 p-6 rounded-2xl">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Description</h2>
+          <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{app.description}</p>
         </section>
         <section>
-          <h2 className="text-2xl font-bold mb-4">Additional Information</h2>
-          <div className="bg-dark-800 p-4 rounded-2xl">
-            <div className="grid grid-cols-2 gap-4">
-              <div><strong className="text-gray-400">Version:</strong> {app.version}</div>
-              <div><strong className="text-gray-400">Updated On:</strong> {lastUpdatedDate}</div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Additional Information</h2>
+          <div className="bg-white dark:bg-dark-800 p-4 rounded-2xl">
+            <div className="grid grid-cols-2 gap-4 text-gray-800 dark:text-gray-200">
+              <div><strong className="text-gray-500 dark:text-gray-400">Version:</strong> {app.version}</div>
+              <div><strong className="text-gray-500 dark:text-gray-400">Updated On:</strong> {lastUpdatedDate}</div>
             </div>
           </div>
         </section>
