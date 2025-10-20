@@ -1,6 +1,7 @@
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
+import Link from 'next/link';
 import { doc, getDoc, Timestamp, updateDoc, increment } from 'firebase/firestore';
 import { firestore } from '@/config/firebase';
 import type { App } from '@/types/app';
