@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
-import { auth } from '@/config/firebase';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '@/config/firebase';
 import ThemeChanger from './ThemeChanger';
+import SearchBar from '../search/SearchBar'; // Import the new SearchBar
 
 export default function Header() {
   const { user } = useAuth();
@@ -15,10 +16,16 @@ export default function Header() {
 
   return (
     <header className="bg-white/80 dark:bg-dark-800/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200 dark:border-dark-700">
-      <nav className="container mx-auto flex justify-between items-center p-4">
+      <nav className="container mx-auto flex justify-between items-center p-4 gap-4">
         <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white hover:text-brand transition-colors">
           MMN Store
         </Link>
+        
+        {/* Centered Search Bar */}
+        <div className="flex-1 flex justify-center">
+          <SearchBar />
+        </div>
+
         <div className="flex items-center space-x-4">
           <ThemeChanger />
           {user ? (
