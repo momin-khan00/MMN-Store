@@ -19,10 +19,8 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
   useEffect(() => {
     if (isOpen) {
-      // Auto-focus the input when the overlay opens
       setTimeout(() => inputRef.current?.focus(), 100);
     } else {
-      // Reset search when closed
       setSearchTerm('');
       setResults([]);
     }
@@ -61,7 +59,6 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                   ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        {/* Search Input and Close Button */}
         <div className="flex items-center gap-4 mb-4">
           <div className="relative flex-1">
             <input
@@ -83,7 +80,6 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
           </button>
         </div>
 
-        {/* Search Results */}
         <div className="mt-6">
           {isLoading && <div className="p-4 text-center text-sm text-gray-500">Searching...</div>}
           {!isLoading && results.length > 0 && (
