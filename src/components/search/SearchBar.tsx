@@ -1,20 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Search, ArrowLeft } from 'react-feather';
+import { Search } from 'react-feather';
 import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 import { firestore } from '@/config/firebase';
 import type { App } from '@/types/app';
 import Image from 'next/image';
 
-interface SearchBarProps {
-  isSearching: boolean;
-  setIsSearching: (isSearching: boolean) => void;
-}
-
-export default function SearchBar({ isSearching, setIsSearching }: SearchBarProps) {
+export default function SearchBar() {
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState<App[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -45,62 +41,46 @@ export default function SearchBar({ isSearching, setIsSearching }: SearchBarProp
     return () => clearTimeout(debounceTimeout);
   }, [searchTerm]);
 
-  const handleFocus = () => {
-    setIsSearching(true);
-  };
-  
-  const handleClose = () => {
-    setIsSearching(false);
-    setSearchTerm('');
-    inputRef.current?.blur();
-  };
-
   useEffect(() => {
-    if (isSearching) {
-        inputRef.current?.focus();
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
     }
-  }, [isSearching]);
-
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [searchContainerRef]);
 
   return (
-    <div className={`relative w-full transition-all duration-300 ease-in-out ${isSearching ? 'z-20' : ''}`} ref={searchContainerRef}>
-      {/* This is the Search icon button when the bar is closed */}
-      {!isSearching && (
-        <button onClick={handleFocus} className="p-2 rounded-full bg-gray-200 dark:bg-dark-700/50 hover:bg-gray-300 dark:hover:bg-dark-700 transition-colors">
-            <Search size={20} className="text-gray-600 dark:text-gray-300"/>
-        </button>
-      )}
-
-      {/* This is the expanded search bar */}
-      <div className={`absolute top-1/2 -translate-y-1/2 right-0 flex items-center transition-all duration-300 ease-in-out ${isSearching ? 'w-full' : 'w-0 opacity-0'}`}>
-        <button onClick={handleClose} className="p-2 text-gray-600 dark:text-gray-300">
-          <ArrowLeft size={24} />
-        </button>
+    <div className="relative" ref={searchContainerRef}>
+      <div className="search-container">
         <input
           ref={inputRef}
-          placeholder="Search for apps..."
-          className="h-12 w-full bg-transparent border-none focus:outline-none text-lg"
+          placeholder="Search..."
+          className="search-input"
           name="text"
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onFocus={() => setShowResults(true)}
         />
+        <div className="search-icon">
+          <Search size={20} />
+        </div>
       </div>
 
-      {/* Search Results Dropdown */}
-      {isSearching && (
-        <div className="absolute top-full mt-2 w-full bg-white dark:bg-dark-800 rounded-lg shadow-lg border border-gray-200 dark:border-dark-700 z-10 overflow-hidden">
-          {/* Results logic remains the same */}
+      {showResults && (
+        <div className="absolute top-full mt-2 w-full min-w-[250px] bg-white dark:bg-dark-800 rounded-lg shadow-lg border border-gray-200 dark:border-dark-700 z-50 overflow-hidden">
           {isLoading && <div className="p-4 text-center text-sm text-gray-500">Searching...</div>}
           {!isLoading && results.length > 0 && (
             <div className="divide-y divide-gray-200 dark:divide-dark-700">
               {results.map(app => (
-                <Link key={app.id} href={`/app/${app.id}`} onClick={handleClose}>
+                <Link key={app.id} href={`/app/${app.id}`} onClick={() => { setSearchTerm(''); setShowResults(false); }}>
                   <div className="flex items-center space-x-3 p-3 hover:bg-gray-100 dark:hover:bg-dark-700 cursor-pointer">
                     <Image src={app.iconUrl} alt={app.name} width={36} height={36} className="rounded-md" />
                     <div>
-                      <p className="font-semibold text-sm">{app.name}</p>
-                      <p className="text-xs text-gray-500">{app.category}</p>
+                      <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">{app.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{app.category}</p>
                     </div>
                   </div>
                 </Link>
@@ -108,7 +88,7 @@ export default function SearchBar({ isSearching, setIsSearching }: SearchBarProp
             </div>
           )}
           {!isLoading && results.length === 0 && searchTerm.length > 1 && (
-            <div className="p-4 text-center text-sm text-gray-500">No results found for "{searchTerm}"</div>
+            <div className="p-4 text-center text-sm text-gray-500">No results for "{searchTerm}"</div>
           )}
         </div>
       )}
