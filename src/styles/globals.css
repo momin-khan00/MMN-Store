@@ -6,24 +6,29 @@ body {
   @apply bg-gray-100 dark:bg-dark-900 text-gray-800 dark:text-gray-100 transition-colors duration-300;
 }
 
-/* --- Professional Animated Search Bar CSS --- */
+/* --- Professional Animated Search Bar CSS (ABSOLUTE POSITION FIX) --- */
+.search-wrapper {
+  position: relative;
+}
+
 .search-container {
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: flex-end; /* Align to the right */
 }
 
 .search-input {
   width: 40px;
   height: 40px;
-  border-radius: 9999px; /* fully rounded */
+  border-radius: 9999px;
   border: none;
   outline: none;
   padding: 18px 16px;
   background-color: transparent;
   cursor: pointer;
   transition: all .5s ease-in-out;
-  @apply text-gray-900 dark:text-gray-100; /* Text color for light/dark mode */
+  @apply text-gray-900 dark:text-gray-100;
 }
 
 .search-input::placeholder {
@@ -34,20 +39,26 @@ body {
   @apply text-gray-400 dark:text-gray-500;
 }
 
-/* When input is focused or has text */
 .search-input:focus,
 .search-input:not(:placeholder-shown) {
+  /* THE FIX: Use absolute position to expand OVER other elements */
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  
   @apply bg-white dark:bg-dark-800;
-  border: 2px solid #0ea5e9; /* brand color */
-  box-shadow: 0 0 15px rgba(14, 165, 233, 0.5); /* Glow effect */
-  width: 250px; /* Expanded width */
+  border: 2px solid #0ea5e9;
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.5);
+  width: 250px;
   cursor: text;
-  padding-left: 45px; /* Space for the icon */
+  padding-left: 45px;
+  z-index: 10; /* Make sure it's on top */
 }
 
 .search-icon {
   position: absolute;
-  left: 0;
+  right: 0;
   top: 0;
   height: 40px;
   width: 40px;
@@ -55,21 +66,20 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  z-index: 1;
-  pointer-events: none; /* Allows clicks to go through to the input */
-  @apply text-brand; /* Icon color */
+  z-index: 11; /* Always on top of the input */
+  pointer-events: none;
+  @apply text-brand;
 }
 
-/* Hide the background circle when input is expanded */
-.search-input:focus + .search-icon-bg,
-.search-input:not(:placeholder-shown) + .search-icon-bg {
-  opacity: 0;
-  transform: scale(0.5);
+.search-input:focus ~ .search-icon,
+.search-input:not(:placeholder-shown) ~ .search-icon {
+    left: 0; /* Move icon to the left when expanded */
+    right: auto;
 }
 
 .search-icon-bg {
   position: absolute;
-  left: 0;
+  right: 0;
   top: 0;
   height: 40px;
   width: 40px;
