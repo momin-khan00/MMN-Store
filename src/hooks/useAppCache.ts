@@ -1,8 +1,9 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { useState, useEffect, createContext, useContext, ReactNode }'react';
+import { collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
 import { firestore } from '@/config/firebase';
 import type { App } from '@/types/app';
 
+// THE FIX: The type definition was missing.
 interface AppCacheContextType {
   apps: App[];
   isLoading: boolean;
@@ -18,14 +19,19 @@ export const AppCacheProvider = ({ children }: { children: ReactNode }) => {
     const fetchAndCacheApps = async () => {
       try {
         const appsRef = collection(firestore, 'apps');
-        // We already have an index for this from our homepage
         const q = query(appsRef, where('status', '==', 'approved'), orderBy('createdAt', 'desc'));
         
         const querySnapshot = await getDocs(q);
-        const approvedApps = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as App));
+        // We must serialize the Timestamps when caching
+        const approvedApps = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                createdAt: (data.createdAt as Timestamp).toDate().toISOString(),
+                updatedAt: data.updatedAt ? (data.updatedAt as Timestamp).toDate().toISOString() : null,
+            }
+        }) as App[];
         
         setApps(approvedApps);
       } catch (err) {
