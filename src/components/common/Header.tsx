@@ -8,12 +8,14 @@ export default function Header() {
   const { user } = useAuth();
 
   return (
-    <header className="bg-white/80 dark:bg-dark-800/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200 dark:border-dark-700">
+    <header className="bg-white/80 dark:bg-dark-800/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200 dark:border-dark-700">
       <nav className="container mx-auto flex justify-between items-center p-4 gap-2 sm:gap-4">
+        {/* Left: Store Name */}
         <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white hover:text-brand transition-colors">
           MMN Store
         </Link>
         
+        {/* Right: Icons (Search is now just an icon) */}
         <div className="flex items-center space-x-2 sm:space-x-3">
           <SearchBar />
           <ThemeChanger />
@@ -30,7 +32,6 @@ export default function Header() {
               </div>
             </Link>
           ) : (
-            // THE FINAL FIX: This is now a Link component pointing to our new login page
             <Link href="/login">
               <button 
                 className="px-4 py-2 text-sm font-semibold rounded-full 
