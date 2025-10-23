@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@/config/firebase';
 import ThemeChanger from './ThemeChanger';
-import SearchBar from '../search/SearchBar'; // Import the new SearchBar
+import SearchBar from '../search/SearchBar';
 
 export default function Header() {
   const { user } = useAuth();
@@ -17,16 +17,14 @@ export default function Header() {
   return (
     <header className="bg-white/80 dark:bg-dark-800/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200 dark:border-dark-700">
       <nav className="container mx-auto flex justify-between items-center p-4 gap-4">
+        {/* Left: Store Name */}
         <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white hover:text-brand transition-colors">
           MMN Store
         </Link>
         
-        {/* Centered Search Bar */}
-        <div className="flex-1 flex justify-center">
+        {/* Right: Icons and Search */}
+        <div className="flex items-center space-x-2 sm:space-x-4">
           <SearchBar />
-        </div>
-
-        <div className="flex items-center space-x-4">
           <ThemeChanger />
           {user ? (
             <Link href="/profile">
@@ -41,7 +39,7 @@ export default function Header() {
               </div>
             </Link>
           ) : (
-            <button onClick={handleSignIn} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-semibold rounded-md transition-colors">
+            <button onClick={handleSignIn} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-semibold rounded-md transition-colors hidden sm:block">
               Login
             </button>
           )}
