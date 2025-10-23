@@ -14,20 +14,15 @@ export default function Header() {
     <>
       <header className="bg-white/80 dark:bg-dark-800/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200 dark:border-dark-700">
         <nav className="container mx-auto flex justify-between items-center p-4 gap-4">
-          {/* Left: Store Name */}
           <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white hover:text-brand transition-colors">
             MMN Store
           </Link>
           
-          {/* Right: Icons */}
           <div className="flex items-center space-x-3 sm:space-x-4">
-            {/* Search Icon Button */}
             <button onClick={() => setIsSearchOpen(true)} className="p-2 text-gray-600 dark:text-gray-300 hover:text-brand dark:hover:text-brand transition-colors">
               <Search size={22} />
             </button>
-
             <ThemeChanger />
-
             {user ? (
               <Link href="/profile">
                 <div className="cursor-pointer block flex-shrink-0">
@@ -55,8 +50,6 @@ export default function Header() {
           </div>
         </nav>
       </header>
-
-      {/* The Search Overlay is now controlled from here */}
       <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </>
   );
