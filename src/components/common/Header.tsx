@@ -15,7 +15,7 @@ export default function Header() {
           MMN Store
         </Link>
         
-        {/* Right: Icons (Search is now just an icon) */}
+        {/* Right: Icons and Search */}
         <div className="flex items-center space-x-2 sm:space-x-3">
           <SearchBar />
           <ThemeChanger />
